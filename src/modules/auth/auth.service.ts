@@ -1,6 +1,8 @@
+import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { IloginUser } from "./auth.interface"
 import  bcrypt  from 'bcryptjs';
+import jwt, { SignOptions } from "jsonwebtoken"
 
 const loginUser =async(payload:IloginUser)=>{
     const  {email,password}= payload;
@@ -17,11 +19,36 @@ const loginUser =async(payload:IloginUser)=>{
         where:{email}
     })
 
+    //check password
     const isPasswordMatched = await bcrypt.compare(password , user.password);
     if(!isPasswordMatched){
         throw new Error("Password is incorrect");
     }
-    return user;
+    
+    //login jwt token
+        const jwtPayload ={
+        id:user.id,
+        name:user.name,
+        email:user.email,
+        role:user.role
+    }
+
+    const accessToken = jwt.sign(jwtPayload,config.jwt_access_secret,{
+        expiresIn:config.jwt_access_expires_in
+    }as SignOptions
+)
+
+     //refresh token
+
+     const refreshToken = jwt.sign(jwtPayload,config.jwt_refresh_secret,{
+        expiresIn:config.jwt_refresh_expires_in
+    } as SignOptions
+)
+
+    return {
+        accessToken,
+        refreshToken
+    }
 }
 
 export const authService ={
