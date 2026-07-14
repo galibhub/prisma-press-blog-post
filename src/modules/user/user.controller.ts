@@ -2,6 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import httpStatus from "http-status";
 import { userService } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
 
 //error handler higher-order-function
 
@@ -44,31 +45,31 @@ import { catchAsync } from "../../utils/catchAsync";
 
 //send response for response handeling
 
-type TMeta ={
-        page:number;
-        limit:number;
-        total:number
-}
+// type TMeta ={
+//         page:number;
+//         limit:number;
+//         total:number
+// }
 
 
-type TResponseData<T>={
-    success:boolean;
-    statusCode:number;
-    message:string;
-    data: T;
-    meta ? : TMeta
-}
+// type TResponseData<T>={
+//     success:boolean;
+//     statusCode:number;
+//     message:string;
+//     data: T;
+//     meta ? : TMeta
+// }
 
 
-const sendResponse =<T>(res:Response,data:TResponseData<T>)=>{
-  res.status(data.statusCode).json({
-    success:data.success,
-    statusCode:data.statusCode,
-    message:data.message,
-    data:data.data,
-    meta:data.meta
-  })
-}
+// const sendResponse =<T>(res:Response,data:TResponseData<T>)=>{
+//   res.status(data.statusCode).json({
+//     success:data.success,
+//     statusCode:data.statusCode,
+//     message:data.message,
+//     data:data.data,
+//     meta:data.meta
+//   })
+// }
 
 //=> Register user 
 const registerUser = catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
