@@ -66,4 +66,14 @@ router.get(
   userController.getMyProfle,
 );
 
+
+
+
+
+
+
+//update profile
+
+router.put("/my-profile", auth(Role.ADMIN,Role.USER,Role.AUTHOR),userController.updateMyProfile)
+
 export const userRoutes = router;
