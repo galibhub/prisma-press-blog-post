@@ -3,6 +3,9 @@ import httpStatus from "http-status";
 import { userService } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import jwt from "jsonwebtoken";
+import config from "../../config";
+import { jwtUtils } from "../../utils/jwt";
 
 //error handler higher-order-function
 
@@ -24,7 +27,6 @@ import { sendResponse } from "../../utils/sendResponse";
 //   };
 // };
 
-
 // const registerUser = async (req: Request, res: Response) => {
 //   try {
 //     const payload = req.body;
@@ -42,7 +44,6 @@ import { sendResponse } from "../../utils/sendResponse";
 //   } catch (error) {}
 // };
 
-
 //send response for response handeling
 
 // type TMeta ={
@@ -51,7 +52,6 @@ import { sendResponse } from "../../utils/sendResponse";
 //         total:number
 // }
 
-
 // type TResponseData<T>={
 //     success:boolean;
 //     statusCode:number;
@@ -59,7 +59,6 @@ import { sendResponse } from "../../utils/sendResponse";
 //     data: T;
 //     meta ? : TMeta
 // }
-
 
 // const sendResponse =<T>(res:Response,data:TResponseData<T>)=>{
 //   res.status(data.statusCode).json({
@@ -71,8 +70,9 @@ import { sendResponse } from "../../utils/sendResponse";
 //   })
 // }
 
-//=> Register user 
-const registerUser = catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+//=> Register user
+const registerUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
 
     const user = await userService.registerUserIntoDb(payload);
@@ -84,14 +84,47 @@ const registerUser = catchAsync(async(req:Request,res:Response,next:NextFunction
     //     user,
     //   },
     // });
-    sendResponse(res,{
+    sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
       message: "User Created Successfully",
-      data: {user,}
-    })
-})
+      data: { user },
+    });
+  },
+);
+
+//get my profile
+
+const getMyProfle = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    //  const cookies = req.cookies;
+    const { accessToken } = req.cookies;
+    console.log(accessToken);
+
+    const verifiedToken = jwtUtils.verifyToken(
+      accessToken,
+      config.jwt_access_secret,
+    );
+    console.log(verifiedToken);
+
+    if (typeof verifiedToken === "string") {
+      throw new Error(verifiedToken);
+    }
+
+    const profile = await userService.getMyProfileFromDB(verifiedToken.id);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User Profile fetched successfully",
+      data: {
+        profile,
+      },
+    });
+  },
+);
 
 export const userController = {
   registerUser,
+  getMyProfle,
 };
