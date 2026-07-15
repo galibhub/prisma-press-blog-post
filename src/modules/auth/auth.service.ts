@@ -8,17 +8,13 @@ import jwt, { SignOptions } from "jsonwebtoken";
 const loginUser = async (payload: IloginUser) => {
   const { email, password } = payload;
 
-  // const user = await prisma.user.findUnique({
-  //     where:{email}
-  // })
-
-  // if(!user){
-  //     throw new Error("User not found");
-  // }
-
   const user = await prisma.user.findUniqueOrThrow({
     where: { email },
   });
+
+  if(user.activeStatus === "BLOCKED"){
+        throw new Error("Your account has been blocked.Please contact support")
+    }
 
   //check password
   const isPasswordMatched = await bcrypt.compare(password, user.password);
