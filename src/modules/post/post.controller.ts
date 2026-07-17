@@ -5,6 +5,7 @@ import { postService } from "./post.service";
 import { sendResponse } from "../../utils/sendResponse";
 
 
+
 //create Post
 const createPost = catchAsync(async (req : Request, res : Response, next : NextFunction) => {
     const id = req.user?.id;
@@ -25,7 +26,14 @@ const createPost = catchAsync(async (req : Request, res : Response, next : NextF
 
 //all post
 const getAllPosts = catchAsync(async (req : Request, res : Response, next : NextFunction) => {
-    
+    const result = await postService.getAllPosts();
+
+    sendResponse(res,{
+        success:true,
+        statusCode:httpStatus.CREATED,
+        message:"Post Retrived Successfully",
+        data:result
+    })
 })
 
 const getPostById = catchAsync(async (req : Request, res : Response, next : NextFunction) => {
