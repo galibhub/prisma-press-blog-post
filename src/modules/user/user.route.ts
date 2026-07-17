@@ -9,6 +9,7 @@ import { Role } from "../../../generated/prisma/enums";
 import { catchAsync } from "../../utils/catchAsync";
 import { JwtPayload } from "jsonwebtoken";
 import auth from "../../middlewares/auth";
+import { authController } from "../auth/auth.controller";
 
 const router = Router();
 
@@ -75,5 +76,7 @@ router.get(
 //update profile
 
 router.put("/my-profile", auth(Role.ADMIN,Role.USER,Role.AUTHOR),userController.updateMyProfile)
+
+
 
 export const userRoutes = router;

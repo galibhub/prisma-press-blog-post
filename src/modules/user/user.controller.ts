@@ -155,8 +155,11 @@ const updateMyProfile = catchAsync(
 
 
 
+
+
 export const userController = {
   registerUser,
   getMyProfle,
-  updateMyProfile
+  updateMyProfile,
+  
 };
