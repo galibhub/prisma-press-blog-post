@@ -20,7 +20,11 @@ const getAllPosts = async () => {
     const posts = await prisma.post.findMany(
         {
             include:{
-                author:true,
+                author:{
+                    omit:{
+                        password:true
+                    }
+                },
                 comments:true
             }
         }
