@@ -30,5 +30,7 @@ app.get("/", async (req: Request, res: Response) => {
 // => Create or Register User
 app.use("/api/users",userRoutes)
 app.use("/api/auth",authRoutes)
+app.use("/api/posts",postRoutes)
+app.use("/api/comments",commentRoutes)
 
 export default app;
