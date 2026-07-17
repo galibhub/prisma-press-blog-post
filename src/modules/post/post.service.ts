@@ -27,8 +27,6 @@ const getAllPosts = async () => {
   return posts;
 };
 
-
-
 //get post by id
 const getPostById = async (postId: string) => {
   const post = await prisma.post.findUniqueOrThrow({
@@ -57,9 +55,6 @@ const getPostById = async (postId: string) => {
   return updatedPost;
 };
 
-
-
-
 //update post
 const updatePost = async () => {};
 
@@ -67,7 +62,30 @@ const updatePost = async () => {};
 const deletePost = async () => {};
 
 //get my post
-const getMyPosts = async (authorId: string) => {};
+const getMyPosts = async (authorId: string) => {
+  const result = await prisma.post.findMany({
+    where: {
+      authorId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      comments: true,
+      author: {
+        omit: {
+          password: true,
+        },
+      },
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
+  });
+  return result
+};
 
 export const postService = {
   createPost,
@@ -75,4 +93,5 @@ export const postService = {
   getPostById,
   updatePost,
   deletePost,
+  getMyPosts
 };
