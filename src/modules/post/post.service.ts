@@ -236,29 +236,38 @@ const getPostsStats = async () => {
       where: {
         status: CommentStatus.REJECT,
       },
-      
     });
-     // total view count - not a good approch
-    const allPosts = await tx.post.findMany();
-    let totalPostViews = 0;
+    // total view count - not a good approch
+    // const allPosts = await tx.post.findMany();
+    // let totalPostViews = 0;
 
-    allPosts.forEach((post)=>{
-      totalPostViews = totalPostViews + post.views
-    })
+    // allPosts.forEach((post)=>{
+    //   totalPostViews = totalPostViews + post.views
+    // })
 
 
-    return {totalPosts,
+    //totalpostview using aggregate 
+    const totalPostViewsAggregate = await tx.post.aggregate({
+      _sum: {
+        views: true,
+      },
+    });
+
+    const totalPostViews = totalPostViewsAggregate._sum.views;
+
+    return {
+      totalPosts,
       totalPublishedPost,
       totalArchivedPosts,
       totalDraftPosts,
       totalApprovedComments,
       totalComments,
       totalRejectedComments,
-      totalPostViews
-    }
+      totalPostViews,
+    };
   });
 
-  return transactionResult
+  return transactionResult;
 };
 
 export const postService = {
