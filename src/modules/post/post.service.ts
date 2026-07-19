@@ -1,4 +1,4 @@
-import { CommentStatus } from "../../../generated/prisma/enums";
+import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { ICreatePostPayload, IUpdatePostPayload } from "./post.interface";
 
@@ -90,11 +90,7 @@ const getPostById = async (postId: string) => {
       },
     });
 
-
-
-// throw new Error("Fake")
-
-
+    // throw new Error("Fake")
 
     const post = await tx.post.findUniqueOrThrow({
       where: {
@@ -126,7 +122,7 @@ const getPostById = async (postId: string) => {
     return post;
   });
 
-  return transactionResult
+  return transactionResult;
 };
 
 //update post
@@ -209,6 +205,62 @@ const getMyPosts = async (authorId: string) => {
   return result;
 };
 
+const getPostsStats = async () => {
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    const totalPosts = await tx.post.count();
+    const totalPublishedPost = await tx.post.count({
+      where: {
+        status: PostStatus.PUBLISHED,
+      },
+    });
+
+    const totalDraftPosts = await tx.post.count({
+      where: {
+        status: PostStatus.DRAFT,
+      },
+    });
+
+    const totalArchivedPosts = await tx.post.count({
+      where: {
+        status: PostStatus.ARCHIVED,
+      },
+    });
+    const totalComments = await tx.comment.count();
+    const totalApprovedComments = await tx.comment.count({
+      where: {
+        status: CommentStatus.APPROVED,
+      },
+    });
+
+    const totalRejectedComments = await tx.comment.count({
+      where: {
+        status: CommentStatus.REJECT,
+      },
+      
+    });
+     // total view count - not a good approch
+    const allPosts = await tx.post.findMany();
+    let totalPostViews = 0;
+
+    allPosts.forEach((post)=>{
+      totalPostViews = totalPostViews + post.views
+    })
+
+
+    return {totalPosts,
+      totalPublishedPost,
+      totalArchivedPosts,
+      totalDraftPosts,
+      totalApprovedComments,
+      totalComments,
+      totalRejectedComments,
+      totalPostViews
+    }
+  });
+
+  return transactionResult
+};
+
 export const postService = {
   createPost,
   getAllPosts,
@@ -216,4 +268,5 @@ export const postService = {
   updatePost,
   deletePost,
   getMyPosts,
+  getPostsStats,
 };
