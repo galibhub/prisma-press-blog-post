@@ -36,45 +36,97 @@ const getPostById = async (postId: string) => {
   //   },
   // });
 
-  await prisma.post.update({
-    where: {
-      id: postId,
-    },
-    data: {
-      views: {
-        increment: 1,
+  // await prisma.post.update({
+  //   where: {
+  //     id: postId,
+  //   },
+  //   data: {
+  //     views: {
+  //       increment: 1,
+  //     },
+  //   },
+  // });
+
+  // const post = await prisma.post.findFirstOrThrow({
+  //   where: {
+  //     id: postId,
+  //   },
+
+  //   include: {
+  //     author: {
+  //       omit: {
+  //         password: true,
+  //       },
+  //     },
+  //     comments: {
+  //       where: {
+  //         status: CommentStatus.APPROVED,
+  //       },
+  //       orderBy: {
+  //         createdAt: "desc",
+  //       },
+  //     },
+  //     _count: {
+  //       select: {
+  //         comments: true,
+  //       },
+  //     },
+  //   },
+  // });
+
+  // return post;
+
+  //-=====transanction - rollback
+
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    await tx.post.update({
+      where: {
+        id: postId,
       },
-    },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+    });
+
+
+
+// throw new Error("Fake")
+
+
+
+    const post = await tx.post.findUniqueOrThrow({
+      where: {
+        id: postId,
+      },
+
+      include: {
+        author: {
+          omit: {
+            password: true,
+          },
+        },
+        comments: {
+          where: {
+            status: CommentStatus.APPROVED,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
+      },
+    });
+
+    return post;
   });
 
-  const post = await prisma.post.findFirstOrThrow({
-    where: {
-      id: postId,
-    },
-
-    include: {
-      author: {
-        omit: {
-          password: true,
-        },
-      },
-      comments: {
-        where: {
-          status: CommentStatus.APPROVED,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      },
-      _count: {
-        select: {
-          comments: true,
-        },
-      },
-    },
-  });
-
-  return post;
+  return transactionResult
 };
 
 //update post
