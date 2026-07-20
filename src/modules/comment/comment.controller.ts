@@ -37,10 +37,23 @@ const getCommentByAuthorId = catchAsync(async (req : Request, res : Response, ne
 
 
 
+//=> get comment by comment Id
+const getCommentByCommentId = catchAsync(
+  async (req: Request, res: Response) => {
 
-const getCommentByCommentId = catchAsync(async (req : Request, res : Response, next : NextFunction) => {
+    const commentId = req.params.commentId as string; ;
 
-})
+    const result = await commentService.getCommentByCommentId(commentId);
+
+    sendResponse(res,{
+      success:true,
+      statusCode:httpStatus.OK,
+      message:"Comment retrieved successfully",
+      data:result
+    });
+
+  }
+);
 
 
 
