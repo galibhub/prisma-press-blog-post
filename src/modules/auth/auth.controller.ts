@@ -6,6 +6,7 @@ import httpStatus from "http-status";
 
 const loginUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+     console.log("Controller Hit");
     // login logic here
     const payload = req.body;
     // const loginResult = await authService.loginUser(payload);

@@ -25,8 +25,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // routes
-app.get("/", async (req: Request, res: Response) => {
-  res.send("Hello World");
+app.get("/", (req, res) => {
+  console.log("Root Hit");
+  res.status(200).send("Hello World");
 });
 
 // => Create or Register User
