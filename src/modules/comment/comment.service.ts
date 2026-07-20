@@ -1,11 +1,9 @@
 import { prisma } from "../../lib/prisma";
 import { ICreateCommentPayload } from "./comment.interface";
 
-
-
 const createComment = async (
   authorId: string,
-  payload: ICreateCommentPayload
+  payload: ICreateCommentPayload,
 ) => {
   await prisma.post.findUniqueOrThrow({
     where: {
@@ -23,26 +21,43 @@ const createComment = async (
   return comment;
 };
 
-
-
-
-
-
-
-
-
-
-const getCommentByAuthorId = async (
-  authorId: string
-) => {
-
+const getCommentByAuthorId = async (authorId: string) => {
   const result = await prisma.comment.findMany({
-
     where: {
       authorId,
     },
 
     include: {
+      post: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return result;
+};
+
+const getCommentByCommentId = async (commentId: string) => {
+  const result = await prisma.comment.findUniqueOrThrow({
+    where: {
+      id: commentId,
+    },
+
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
 
       post: {
         select: {
@@ -50,71 +65,55 @@ const getCommentByAuthorId = async (
           title: true,
         },
       },
-
     },
-
-    orderBy: {
-      createdAt: "desc",
-    },
-
   });
 
   return result;
-
 };
 
-const getCommentByCommentId = async (
-  commentId:string
+
+//=>update comment API
+const updateComment = async (
+  authorId: string,
+  commentId: string,
+  payload: {
+    content: string;
+  },
 ) => {
-
-  const result = await prisma.comment.findUniqueOrThrow({
-
-    where:{
-      id:commentId
+  // Comment exists কিনা
+  const comment = await prisma.comment.findUniqueOrThrow({
+    where: {
+      id: commentId,
     },
+  });
 
-    include:{
+  // Ownership check
+  if (comment.authorId !== authorId) {
+    throw new Error("You are not authorized to update this comment");
+  }
 
-      author:{
-        select:{
-          id:true,
-          name:true,
-          email:true
-        }
-      },
-
-      post:{
-        select:{
-          id:true,
-          title:true
-        }
-      }
-
-    }
-
+  // Update
+  const result = await prisma.comment.update({
+    where: {
+      id: commentId,
+    },
+    data: {
+      content: payload.content,
+    },
   });
 
   return result;
-
 };
 
-const updateComment = () => {
+const deleteComment = () => {};
 
-}
-
-const deleteComment = () => {
-
-}
-
-const moderateComment = () => {
-
-}
+const moderateComment = () => {};
 
 export const commentService = {
-    createComment,
-    getCommentByAuthorId,
-    getCommentByCommentId,
-    updateComment,
-    deleteComment,
-    moderateComment
-}
+  createComment,
+  getCommentByAuthorId,
+  getCommentByCommentId,
+  updateComment,
+  deleteComment,
+  moderateComment,
+};
