@@ -71,7 +71,6 @@ const getCommentByCommentId = async (commentId: string) => {
   return result;
 };
 
-
 //=>update comment API
 const updateComment = async (
   authorId: string,
@@ -105,9 +104,55 @@ const updateComment = async (
   return result;
 };
 
-const deleteComment = () => {};
+//=>Delete comment
+const deleteComment = async (authorId: string, commentId: string) => {
+  // Comment exists
+  const comment = await prisma.comment.findUniqueOrThrow({
+    where: {
+      id: commentId,
+    },
+  });
 
-const moderateComment = () => {};
+  // Ownership check
+  if (comment.authorId !== authorId) {
+    throw new Error("You are not authorized to delete this comment");
+  }
+
+  // Delete
+  const result = await prisma.comment.delete({
+    where: {
+      id: commentId,
+    },
+  });
+
+  return result;
+};
+
+import { CommentStatus } from "../../../generated/prisma/enums";
+
+const moderateComment = async (
+  commentId: string,
+  payload: {
+    status: CommentStatus;
+  },
+) => {
+  await prisma.comment.findUniqueOrThrow({
+    where: {
+      id: commentId,
+    },
+  });
+
+  const result = await prisma.comment.update({
+    where: {
+      id: commentId,
+    },
+    data: {
+      status: payload.status,
+    },
+  });
+
+  return result;
+};
 
 export const commentService = {
   createComment,
